@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import {
   UserIcon,
   Building2Icon,
-  MapPinIcon
+  MapPinIcon,
+  ListChecksIcon, // ajouté
 } from "lucide-react";
 import { useApiData } from "@/api/Users/getUserInfo";
 import CompteInformations from "@/components/Compte/informations";
@@ -19,10 +20,13 @@ import CompteAdresse from "@/components/Compte/carnet_adresse_livraison";
 import CompteAdresseEdit from "@/components/Compte/carnet_adresse_livraison_edit";
 import CompteAdresseFacturation from "@/components/Compte/carnet_adresse_facturation";
 import CompteAdresseFacturationEdit from "@/components/Compte/carnet_adresse_facturation_edit";
+import HistoriqueDesCommandes from "@/components/Compte/historique_commandes";
+
 const tabs = [
   { name: "Informations", icon: UserIcon },
   { name: "Informations entreprise", icon: Building2Icon },
   { name: "Carnet d'adresse", icon: MapPinIcon },
+  { name: "Historique des commandes", icon: ListChecksIcon }, // nouvel onglet
 ];
 
 export default function Compte() {
@@ -118,6 +122,12 @@ export default function Compte() {
                         : <CompteAdresseFacturation />
                       }
                     </div>
+                  </div>
+                )}
+
+                {activeTab === "Historique des commandes" && (
+                  <div>
+                    <HistoriqueDesCommandes />
                   </div>
                 )}
               </CardContent>

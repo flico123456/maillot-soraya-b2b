@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from 'next/image';
 import { useApiData } from "@/api/Users/getUserInfo";
@@ -35,6 +35,22 @@ export default function DevisFR() {
     const apiData = useApiData();
     const [cart, setCart] = useState<CartItem[]>([]);
     const [priceShipping, setPriceShipping] = useState<number | null>(null);
+    const [priceTotalHT, setPriceTotalHT] = useState<number | null>(null);
+    const [priceTotalTTC, setPriceTotalTTC] = useState<number | null>(null);
+
+    useEffect(() => {
+        const priceTTC = localStorage.getItem('PriceTotalTTC');
+        if (priceTTC) {
+            setPriceTotalTTC(parseFloat(priceTTC));
+        }
+    }, []);
+
+    useEffect(() => {
+        const priceTotal = localStorage.getItem('PriceTotalHT');
+        if (priceTotal) {
+            setPriceTotalHT(parseFloat(priceTotal));
+        }
+    }, []);
 
     useEffect(() => {
         const storedPrice = localStorage.getItem("shippingCost");
@@ -159,21 +175,45 @@ export default function DevisFR() {
                                 <table className="text-xs border border-gray-300 min-w-[220px]">
                                     <tbody>
                                         <tr>
-                                            <td className="border px-2 py-1 text-right font-semibold w-32 bg-color-fond">Total HT</td>
+                                            <td className="border px-2 py-1 text-right font-semibold w-32 bg-color-fond">Total articles HT</td>
                                             <td className="border px-2 py-1 text-right font-semibold w-24">
                                                 {cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)} €
                                             </td>
                                         </tr>
                                         <tr>
+                                            <td className="border px-2 py-1 text-right font-semibold bg-color-fond">Livraison HT</td>
+                                            <td className="border px-2 py-1 text-right font-semibold">
+                                                {priceShipping?.toFixed(2)} €
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border px-2 py-1 text-right font-semibold bg-color-fond">Total HT</td>
+                                            <td className="border px-2 py-1 text-right font-semibold">
+                                                {priceTotalHT} €
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <td className="border px-2 py-1 text-right font-semibold bg-color-fond">TVA (20%)</td>
                                             <td className="border px-2 py-1 text-right font-semibold">
-                                                {(cart.reduce((sum, item) => sum + item.price * item.quantity, 0) * 0.2).toFixed(2)} €
+                                                {((priceTotalHT || 0) * 0.2).toFixed(2)} €
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className="border px-2 py-1 text-right font-semibold bg-color-fond">Total TTC</td>
                                             <td className="border px-2 py-1 text-right font-semibold">
-                                                {(cart.reduce((sum, item) => sum + item.price * item.quantity, 0) * 1.2).toFixed(2)} €
+                                                {(priceTotalTTC || 0).toFixed(2)} €
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="flex justify-end mt-4">
+                                <table className="text-xs border border-gray-300 min-w-[220px]">
+                                    <tbody>
+                                        <tr>
+                                            <td className="border px-2 py-1 text-right font-semibold w-32 bg-color-fond">NET A PAYER</td>
+                                            <td className="border px-2 py-1 text-right font-semibold w-24">
+                                                {(priceTotalTTC || 0).toFixed(2)} €
                                             </td>
                                         </tr>
                                     </tbody>
