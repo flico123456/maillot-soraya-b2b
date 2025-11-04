@@ -45,7 +45,7 @@ export default function CompteInformationsEdit() {
                 {/* Ligne 1 : username et email */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="flex-1 space-y-1">
-                        <Label htmlFor="username">Nom d'utilisateur</Label>
+                        <Label htmlFor="username">Nom d&apos;utilisateur</Label>
                         <Input
                             id="username"
                             type="text"

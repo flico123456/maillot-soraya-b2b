@@ -207,7 +207,7 @@ export default function MethodeLivraison() {
 
                 {allEmpty ? (
                     <CardContent>
-                        <p>Aucune adresse de livraison n'a été fournie.</p>
+                        <p>Aucune adresse de livraison n&apos;a été fournie.</p>
                         <div className="mt-6">
                             <div className="flex">
                                 <Button
@@ -272,7 +272,7 @@ export default function MethodeLivraison() {
                             {userIDZone === '3' && userInSchengen && (
                                 <div className="mt-3">
                                     <p className="text-gray-700">
-                                        Pour les livraisons dans l'espace Schengen (Zone 3), veuillez nous contacter pour
+                                        Pour les livraisons dans l&apos;espace Schengen (Zone 3), veuillez nous contacter pour
                                         un devis personnalisé.
                                     </p>
                                 </div>

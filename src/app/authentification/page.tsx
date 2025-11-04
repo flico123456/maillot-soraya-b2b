@@ -82,7 +82,7 @@ export default function Authentification() {
                     </div>
                     <div>
                         <div className="flex justify-center mb-6">
-                            <h2 className="text-2xl font-yanone">Bienvenue dans l'espace B2B de Soraya Swimwear</h2>
+                            <h2 className="text-2xl font-yanone">Bienvenue dans l&apos;espace B2B de Soraya Swimwear</h2>
                         </div>
                         <div className="flex justify-center">
                             <Link className="text-center max-w-md hover:underline" href="https://maillotsoraya.com">
