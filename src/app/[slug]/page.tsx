@@ -5,12 +5,12 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 interface Categorie {
-  id: string;
+  id: string | number;
   name: string;
   images: { src: string }[];
   slug: string;
   description: string;
-  yoast_head_json: { title: string; description: string };
+  yoast_head_json?: { title: string; description: string };
 }
 
 interface MetaDataItem {
@@ -31,50 +31,50 @@ interface Product {
 }
 
 // Util: Basic auth côté Node (pas de btoa en server)
-const BASIC_AUTH = 'Basic ' + Buffer.from(
-  'ck_2a1fa890ddee2ebc1568c314734f51055eae2cba:cs_0ad45ea3da9765643738c94224a1fc58cbf341a7',
-).toString('base64');
+const BASIC_AUTH =
+  'Basic ' +
+  Buffer.from(
+    'ck_2a1fa890ddee2ebc1568c314734f51055eae2cba:cs_0ad45ea3da9765643738c94224a1fc58cbf341a7'
+  ).toString('base64');
 
 // 🔁 Génération des routes statiques
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const res = await fetch(
     'https://maillotsoraya-conception.com/wp-json/wc/v3/products/categories?per_page=100',
-    {
-      headers: { Authorization: BASIC_AUTH },
-      cache: 'no-store',
-    }
+    { headers: { Authorization: BASIC_AUTH }, cache: 'no-store' }
   );
+  if (!res.ok) return [];
 
-  const categories: Categorie[] = await res.json();
-  return categories.map((category) => ({ slug: category.slug }));
+  const categories = (await res.json()) as Categorie[];
+  return (categories || []).map((category) => ({ slug: category.slug }));
 }
 
 // 🔁 Chargement des données pour chaque page
 async function getCategoryPageData(slug: string) {
   const res = await fetch(
-    `https://maillotsoraya-conception.com/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(slug)}`,
-    {
-      headers: { Authorization: BASIC_AUTH },
-      cache: 'no-store',
-    }
+    `https://maillotsoraya-conception.com/wp-json/wc/v3/products/categories?slug=${encodeURIComponent(
+      slug
+    )}`,
+    { headers: { Authorization: BASIC_AUTH }, cache: 'no-store' }
   );
 
-  const categoryData: Categorie[] = await res.json();
-  if (!categoryData || !categoryData[0]) return notFound();
+  if (!res.ok) return null;
+
+  const categoryData = (await res.json()) as Categorie[];
+  if (!categoryData?.[0]) return null;
 
   const categoryId = categoryData[0].id;
 
   const productRes = await fetch(
     `https://maillotsoraya-conception.com/wp-json/wc/v3/products?category=${categoryId}&per_page=100&catalog_visibility=visible`,
-    {
-      headers: { Authorization: BASIC_AUTH },
-      cache: 'no-store',
-    }
+    { headers: { Authorization: BASIC_AUTH }, cache: 'no-store' }
   );
 
-  const productData = await productRes.json();
+  if (!productRes.ok) return null;
 
-  const filteredProductData: Product[] = productData.map((product: any) => {
+  const productData = (await productRes.json()) as any[];
+
+  const products: Product[] = (productData || []).map((product: any) => {
     const meta = product.meta_data || [];
     const clientGrosPrice =
       meta.find((item: any) => item.key === '_role_based_pricing_rules')
@@ -93,20 +93,16 @@ async function getCategoryPageData(slug: string) {
     };
   });
 
-  return { category: categoryData[0], products: filteredProductData };
+  return { category: categoryData[0], products };
 }
 
-// ✅ Page affichée pour chaque catégorie
-// ❗️ Corrigé: pas de Awaited ici; params est un objet, pas une Promise
-export default async function CategorySlugPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const { slug } = params;
+// ✅ Page — neutralise toute contrainte de PageProps globale
+export default async function CategorySlugPage(props: any) {
+  const slug: string | undefined = props?.params?.slug;
+  if (!slug) notFound();
 
-  const data = await getCategoryPageData(slug);
-  if (!data) return null; // notFound() a déjà été déclenché si besoin
+  const data = await getCategoryPageData(slug!);
+  if (!data) notFound();
 
   const { category, products } = data;
 
