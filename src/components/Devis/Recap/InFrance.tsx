@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApiData } from "@/api/Users/getUserInfo";
 import { useRouter } from "next/navigation";
-import Devis from "../devis";
 import DevisFR from "../devisFR";
 
 interface CartItem {
@@ -61,7 +60,7 @@ export default function RecapDevisInFrance() {
   const handleValidateAndPay = () => {
     localStorage.setItem('PriceTotalHT', String(totalPrice + shippingHT));
     localStorage.setItem('PriceTotalTTC', String((totalPrice + shippingHT) * 1.2));
-    router.push('/devis');
+    router.push('/paiement');
   };
 
   return (
@@ -92,7 +91,7 @@ export default function RecapDevisInFrance() {
         </CardContent>
         <CardFooter>
           <Button className="mt-2 w-full bg-black text-white hover:bg-gray-800 text-sm" onClick={handleValidateAndPay}>
-            Visualiser le devis et payer
+            Valider et payer
           </Button>
         </CardFooter>
         <div className="p-4">

@@ -3,6 +3,7 @@ import Layout2 from '@/components/Layout2';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import PriceDisplay from '@/components/Price';
 
 interface Categorie {
   id: string | number;
@@ -134,11 +135,11 @@ export default async function CategorySlugPage(props: any) {
                     </h1>
                   </div>
                   <div className="flex justify-center">
-                    <h1>
-                      {product.clientGrosPrice
-                        ? `${product.clientGrosPrice} € HT`
-                        : `${product.price} €`}
-                    </h1>
+                    <PriceDisplay
+                      price={product.price}
+                      grosPrice={product.clientGrosPrice}
+                      className=""
+                    />
                   </div>
                 </div>
               </Link>

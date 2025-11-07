@@ -103,33 +103,6 @@ export default function MethodeLivraison() {
     // --- Méthodes d'expédition ---
     const [shippingMethods, setShippingMethods] = useState<any[] | undefined>(undefined);
 
-    useEffect(() => {
-        let cancelled = false;
-        const fetchShippingMethods = async () => {
-            try {
-                const methodsResponse = await fetch(
-                    `https://maillotsoraya-conception.com/wp-json/wc/v3/shipping/zones/1/methods`,
-                    {
-                        headers: {
-                            Authorization:
-                                'Basic ' +
-                                btoa('ck_2a1fa890ddee2ebc1568c314734f51055eae2cba:cs_0ad45ea3da9765643738c94224a1fc58cbf341a7'),
-                        },
-                    }
-                );
-                if (!methodsResponse.ok) return;
-                const methods = await methodsResponse.json();
-                if (!cancelled) setShippingMethods(methods);
-            } catch (error) {
-                console.error('Error fetching shipping methods:', error);
-            }
-        };
-        fetchShippingMethods();
-        return () => {
-            cancelled = true;
-        };
-    }, []); // <= IMPORTANT : tableau vide
-
     // --- Checkbox "Je prends en charge" + synchro localStorage ---
     const [takeDelivery, setTakeDelivery] = useState<boolean>(false);
     const [shippingCost, setShippingCost] = useState<number>(0);
@@ -272,7 +245,7 @@ export default function MethodeLivraison() {
                             {userIDZone === '3' && userInSchengen && (
                                 <div className="mt-3">
                                     <p className="text-gray-700">
-                                        Pour les livraisons dans l&apos;espace Schengen (Zone 3), veuillez nous contacter pour
+                                        Pour les livraisons dans la (Zone 3), veuillez nous contacter pour
                                         un devis personnalisé.
                                     </p>
                                 </div>

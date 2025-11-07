@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import Layout2 from "@/components/Layout2";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApiData } from "@/api/Users/getUserInfo";
 import { useRouter } from "next/navigation";
-import MethodeLivraison from "@/components/Livraison/methode_livraison";
+import DevisFR from "../devisFR";
+import DevisOutSideFrance from "../devisOutSideFrance";
 
 interface CartItem {
   sizeId: string;
@@ -21,72 +21,52 @@ interface CartItem {
   sku: number;
 }
 
-export default function RecapDevisOutsideFrance() {
+export default function RecapDevisInFrance() {
   const router = useRouter();
   const apiData = useApiData();
 
   const [priceShipping, setPriceShipping] = useState<number>(0);
   const [takeDelivery, setTakeDelivery] = useState<boolean>(false);
 
-  // Lecture initiale + synchro via CustomEvent (même onglet) + fallback via 'storage' (autres onglets)
+  // lecture initiale + écoute du CustomEvent
   useEffect(() => {
-    const readFromStorage = () => {
+    const read = () => {
       const cost = parseFloat(localStorage.getItem('shippingCost') || '0');
       const take = localStorage.getItem('takeDelivery') === 'true';
       setPriceShipping(Number.isFinite(cost) ? cost : 0);
       setTakeDelivery(take);
     };
-    readFromStorage();
+    read();
 
-    const onCustom = (e: Event) => {
+    const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail || {};
       if (typeof detail.shippingCost === 'number') setPriceShipping(detail.shippingCost);
       if (typeof detail.takeDelivery === 'boolean') setTakeDelivery(detail.takeDelivery);
     };
-    window.addEventListener('shipping:updated', onCustom as EventListener);
 
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === 'shippingCost' || event.key === 'takeDelivery') {
-        readFromStorage();
-      }
-    };
-    window.addEventListener('storage', onStorage);
-
-    return () => {
-      window.removeEventListener('shipping:updated', onCustom as EventListener);
-      window.removeEventListener('storage', onStorage);
-    };
+    window.addEventListener('shipping:updated', handler as EventListener);
+    return () => window.removeEventListener('shipping:updated', handler as EventListener);
   }, []);
 
-  useEffect(() => {
-    if (apiData) {
-      console.log("Données de l'API :", apiData);
-    }
-  }, [apiData]);
-
   const [cart, setCart] = useState<CartItem[]>([]);
+  const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
     if (storedCart) setCart(JSON.parse(storedCart));
   }, []);
 
-  const totalPrice = useMemo(
-    () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
-    [cart]
-  );
-
-  // 0 si prise en charge
   const shippingHT = takeDelivery ? 0 : (priceShipping || 0);
 
   const handleValidateAndPay = () => {
-    // Total HT (hors TVA pour l’international si c’est ta règle côté /devis)
-    localStorage.setItem('PriceTotal', String(totalPrice + shippingHT));
-    router.push('/devis');
+    localStorage.setItem('PriceTotalHT', String(totalPrice + shippingHT));
+    localStorage.setItem('PriceTotalTTC', String((totalPrice + shippingHT) * 1.2));
+    router.push('/paiement');
   };
 
   return (
     <div className="mt-20 mb-10 px-10 flex flex-col lg:flex-row gap-8 justify-center items-start font-inter">
-      <MethodeLivraison />
+      <DevisOutSideFrance/>
 
       <Card className="w-full max-w-sm h-fit p-4 rounded-none shadow-none border border-gray-200">
         <CardHeader>
@@ -101,17 +81,14 @@ export default function RecapDevisOutsideFrance() {
             <span>Frais de livraison :</span>
             <span>{shippingHT.toFixed(2)} € HT</span>
           </div>
-          <div className="flex mt-2 border-t pt-2 justify-between text-base font-semibold">
-            <span>Total HT :</span>
+          <div className="flex mt-2 border-t pt-2 justify-between text-sm font-semibold">
+            <span>Total HT:</span>
             <span>{(totalPrice + shippingHT).toFixed(2)} €</span>
           </div>
         </CardContent>
         <CardFooter>
-          <Button
-            className="mt-2 w-full bg-black text-white hover:bg-gray-800 text-sm"
-            onClick={handleValidateAndPay}
-          >
-            Visualiser le devis et payer
+          <Button className="mt-2 w-full bg-black text-white hover:bg-gray-800 text-sm" onClick={handleValidateAndPay}>
+            Valider et payer
           </Button>
         </CardFooter>
         <div className="p-4">

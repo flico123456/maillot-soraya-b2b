@@ -7,6 +7,8 @@ import Layout2 from '@/components/Layout2';
 import Modal from '@/components/Zoom';
 import { addToCart } from '@/api/addToCart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useEffect } from 'react';
+import PriceDisplay from '@/components/Price';
 import { AlertCircleIcon } from 'lucide-react';
 
 // ❌ SUPPRIMÉ : import { cookies } from 'next/headers'
@@ -254,14 +256,14 @@ const ProductClient: React.FC<Props> = ({
     setNotifMessage("Produit(s) ajouté(s) au panier avec succès !");
   };
 
-  // ❌ SUPPRIMÉ : lecture du cookie ici (impossible côté client)
-  // const currency = ((await cookies()).get("currency")?.value === "EUR") ? "EUR" : "USD";
+    const [isLoggedIn, setIsLoggedIn] = useState<string | null>(null);
 
-  // Affichage du prix principal (client gros) converti + formaté
-  const displayPrice = formatMoney(
-    convertEUR(clientGrosPriceEUR, currency, rateEURtoUSD),
-    currency
-  );
+    useEffect(() => {
+        const storedisLoggedInDistributeur = localStorage.getItem("isLoggedInDistributeur");
+        if (storedisLoggedInDistributeur) {
+            setIsLoggedIn(storedisLoggedInDistributeur);
+        }
+    }, []);
 
   return (
     <Layout2>
@@ -284,7 +286,11 @@ const ProductClient: React.FC<Props> = ({
             <div>
               <h1 className="font-yanone text-2xl max-sm:mt-5">{product[0].name}</h1>
               <div>
-                <h1 className='font-inter font-medium'>{displayPrice}</h1>
+                <PriceDisplay
+                  price={clientGrosPriceEUR}
+                  grosPrice={clientGrosPriceEUR}
+                  className="font-inter font-medium"
+                />
               </div>
             </div>
 
@@ -433,11 +439,25 @@ const ProductClient: React.FC<Props> = ({
 
               {/* BOUTON AJOUTER AU PANIER */}
               <button
-                onClick={() => handleAddToCart()}
-                className='mt-10 font-inter text-sm p-2 border rounded-lg border-slate-500 w-64 text-white bg-black cursor-pointer hover:bg-color-black-soraya'
+                type="button"
+                onClick={() => { if (isLoggedIn !== 'true') return; handleAddToCart(); }}
+                disabled={isLoggedIn !== 'true'}
+                className={`mt-10 font-inter p-2 border rounded-lg bg-black text-white hover:bg-gray-800 text-sm w-64 disabled:cursor-not-allowed ${
+                  isLoggedIn !== 'true'
+                    ? 'opacity-50'
+                    : 'text-white bg-black cursor-pointer hover:bg-color-black-soraya'
+                }`}
               >
                 Ajouter au panier
               </button>
+              <div>
+                {isLoggedIn !== 'true' && (
+                  <div className="flex items-center text-red-600 mt-10">
+                    <AlertCircleIcon className="w-4 h-4 mr-2" />
+                    <span className="text-sm w-60">Veuillez vous connecter pour ajouter des produits au panier.</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>

@@ -189,7 +189,7 @@ export default function DevisFR() {
                                         <tr>
                                             <td className="border px-2 py-1 text-right font-semibold bg-color-fond">Total HT</td>
                                             <td className="border px-2 py-1 text-right font-semibold">
-                                                {priceTotalHT} €
+                                                {priceTotalHT?.toFixed(2)} €
                                             </td>
                                         </tr>
                                         <tr>
