@@ -201,7 +201,7 @@ export default function AuthentificationSoraya() {
           />
 
           <h2 className="mt-4 text-center text-2xl font-yanone">
-            Bienvenue dans l'espace B2B de Soraya Swimwear
+            Bienvenue dans l&apos;espace B2B de Soraya Swimwear
           </h2>
         </div>
 
